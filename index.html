@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rosé & Bloom — High Floristry Atelier & Boutique</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js CDN for Subtle Floating Petals -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          animation: {
+            'ticker': 'ticker 25s linear infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+          },
+          keyframes: {
+            ticker: {
+              '0%': { transform: 'translateX(0%)' },
+              '100%': { transform: 'translateX(-50%)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-12px)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.4' },
+              '50%': { opacity: '0.8' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFAFB;
+      color: #1F2937;
+      overflow-x: hidden;
+    }
+
+    .font-serif-title {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(244, 63, 94, 0.15);
+    }
+
+    .glass-card-hover {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card-hover:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px -15px rgba(244, 63, 94, 0.2);
+      border-color: rgba(244, 63, 94, 0.35);
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, #e11d48 0%, #fb7185 50%, #fda4af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fff1f2;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #fda4af;
+      border-radius: 9999px;
+    }
+    html { scroll-padding-top: 90px; }
+    #cart-fab.bump { animation: bump .4s; }
+    @keyframes bump { 50% { transform: scale(1.18); } }
+    .cat-scroll { scrollbar-width: none; }
+    .cat-scroll::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between">
+
+<header class="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-rose-100 shadow-sm transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <a href="#inicio" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-500 to-rose-300 flex items-center justify-center text-white shadow-md shadow-rose-200 group-hover:scale-105 transition-transform">
+        <i class="fa-solid fa-spa text-lg"></i>
+      </div>
+      <div>
+        <span class="font-serif-title font-bold text-lg sm:text-2xl text-gray-900 tracking-tight block leading-none">ROSÉ <span class="text-rose-500">&</span> BLOOM</span>
+        <span class="hidden sm:block text-[9px] tracking-widest text-rose-400 font-semibold uppercase">Atelier de Alta Floristería</span>
+      </div>
+    </a>
+
+    <!-- Menu Links -->
+    <nav class="hidden lg:flex items-center space-x-7 text-sm font-medium text-gray-600">
+      <a href="#inicio" class="hover:text-rose-500 transition-colors">Inicio</a>
+      <a href="#catalogo" class="hover:text-rose-500 transition-colors">Catálogo (<span id="nav-count">30</span>)</a>
+      <a href="#ocasiones" class="hover:text-rose-500 transition-colors">Ocasiones</a>
+      <a href="#servicios" class="hover:text-rose-500 transition-colors">Servicios VIP</a>
+      <a href="#inspiracion" class="hover:text-rose-500 transition-colors">Filosofía</a>
+      <a href="#boutique-local" class="hover:text-rose-500 transition-colors">Nuestro Local</a>
+      <a href="#faq" class="hover:text-rose-500 transition-colors">Preguntas</a>
+    </nav>
+
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <button onclick="openModal('Asesoría Floral Personalizada')" class="px-3.5 sm:px-5 py-2.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-medium text-sm shadow-md shadow-rose-200 transition-all hover:shadow-lg hover:shadow-rose-300 flex items-center gap-2">
+        <i class="fa-brands fa-whatsapp text-base"></i>
+        <span class="hidden sm:inline">Contactar</span>
+      </button>
+
+      <button onclick="toggleCart(true)" aria-label="Abrir carrito" class="relative w-10 h-10 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span class="cart-count hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+      </button>
+      <button id="mobile-menu-btn" class="lg:hidden text-gray-700 hover:text-rose-500 text-2xl focus:outline-none p-2">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden lg:hidden bg-white/95 border-b border-rose-100 px-4 pt-2 pb-6 space-y-3">
+    <a href="#inicio" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Inicio</a>
+    <a href="#catalogo" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Catálogo</a>
+    <a href="#ocasiones" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Ocasiones Especiales</a>
+    <a href="#servicios" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Servicios VIP</a>
+    <a href="#inspiracion" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Filosofía</a>
+    <a href="#boutique-local" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Nuestro Local</a>
+    <a href="#faq" class="mobile-link block py-2 text-gray-700 font-medium hover:text-rose-500">Preguntas Frecuentes</a>
+  </div>
+</header>
+
+<section id="inicio" class="relative min-h-[80vh] md:min-h-[88vh] flex items-center pt-28 pb-24 overflow-hidden bg-gradient-to-b from-rose-50/70 via-white to-rose-50/40">
+  <div id="canvas-container"></div>
+  <div class="max-w-4xl mx-auto px-5 sm:px-6 relative z-10 text-center space-y-6">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100/80 text-rose-600 text-[11px] font-semibold uppercase tracking-widest"><i class="fa-solid fa-heart"></i> Alta Cosecha & Arte Floral</div>
+    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-serif-title font-bold text-gray-900 leading-[1.1]">Redefiniendo la <span class="text-gradient">Poesía Floral</span> en Cada Pétalo</h1>
+    <p class="text-gray-600 text-base sm:text-lg">Flores que dicen lo que las palabras no alcanzan.</p>
+    <a href="#catalogo" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm shadow-lg shadow-rose-200 transition-all hover:-translate-y-0.5">Explorar catálogo <i class="fa-solid fa-chevron-down text-xs"></i></a>
+  </div>
+</section>
+
+<section class="py-4 bg-gradient-to-r from-rose-500 via-rose-600 to-rose-500 text-white overflow-hidden shadow-inner">
+  <div class="flex whitespace-nowrap animate-ticker">
+    <div class="flex items-center gap-12 font-medium text-xs sm:text-sm tracking-wider uppercase px-4">
+      <span class="flex items-center gap-2"><i class="fa-solid fa-sparkles text-rose-200"></i> Elegancia & Arte Floral</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-van-shuttle text-rose-200"></i> Envío Exprés Climatizado</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-ribbon text-rose-200"></i> Diseños Únicos de Autor</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-envelope text-rose-200"></i> Tarjeta Personalizada Caligrafiada Gratis</span>
+    </div>
+    <div class="flex items-center gap-12 font-medium text-xs sm:text-sm tracking-wider uppercase px-4">
+      <span class="flex items-center gap-2"><i class="fa-solid fa-sparkles text-rose-200"></i> Elegancia & Arte Floral</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-van-shuttle text-rose-200"></i> Envío Exprés Climatizado</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-ribbon text-rose-200"></i> Diseños Únicos de Autor</span>
+      <span class="flex items-center gap-2"><i class="fa-solid fa-envelope text-rose-200"></i> Tarjeta Personalizada Caligrafiada Gratis</span>
+    </div>
+  </div>
+</section>
+
+<section class="py-14 sm:py-20 bg-white">
+  <div class="max-w-3xl mx-auto px-5 text-center space-y-4">
+    <div class="flex items-center justify-center gap-3 text-rose-300">
+      <span class="h-px w-12 bg-rose-200"></span><i class="fa-solid fa-spa text-rose-400"></i><span class="h-px w-12 bg-rose-200"></span>
+    </div>
+    <p class="font-serif-title italic text-2xl sm:text-4xl text-gray-800 leading-snug">Cada flor cuenta una historia.<br class="hidden sm:block"> <span class="text-gradient font-semibold not-italic">Elige la que quieras contar hoy.</span></p>
+  </div>
+</section>
+
+<section id="catalogo" class="pt-14 sm:pt-20 pb-16 bg-rose-50/40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-10 space-y-2">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3.5 py-1.5 rounded-full">Colección de autor</span>
+      <h2 class="text-3xl sm:text-4xl font-serif-title font-bold text-gray-900 pt-2">Elige tu <span class="text-gradient">arreglo</span></h2>
+    </div>
+    <div class="md:sticky md:top-20 z-30 glass-card p-3 rounded-2xl mb-6 space-y-3 md:space-y-0 md:flex md:items-center md:justify-between shadow-sm">
+      <div class="cat-scroll flex flex-nowrap md:flex-wrap overflow-x-auto md:overflow-visible gap-2 pb-1 md:pb-0 min-w-0">
+        <button onclick="filterCatalog('all')" class="cat-filter-btn active whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-500 text-white" data-cat="all">Todos (<span id="cat-all-count">30</span>)</button>
+        <button onclick="filterCatalog('bouquets')" class="cat-filter-btn whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-50 text-gray-600 hover:bg-rose-100" data-cat="bouquets">Bouquets (<span id="cat-bouquets-count">0</span>)</button>
+        <button onclick="filterCatalog('boxes')" class="cat-filter-btn whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-50 text-gray-600 hover:bg-rose-100" data-cat="boxes">Cajas Luxury (<span id="cat-boxes-count">0</span>)</button>
+        <button onclick="filterCatalog('preserved')" class="cat-filter-btn whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-50 text-gray-600 hover:bg-rose-100" data-cat="preserved">Preservadas (<span id="cat-preserved-count">0</span>)</button>
+        <button onclick="filterCatalog('orchids')" class="cat-filter-btn whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-50 text-gray-600 hover:bg-rose-100" data-cat="orchids">Orquídeas (<span id="cat-orchids-count">0</span>)</button>
+        <button onclick="filterCatalog('vases')" class="cat-filter-btn whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-50 text-gray-600 hover:bg-rose-100" data-cat="vases">Jarrones (<span id="cat-vases-count">0</span>)</button>
+      </div>
+      <div class="relative w-full md:w-64">
+        <input type="text" id="catalog-search" oninput="handleSearch()" placeholder="Buscar flor o diseño..." class="w-full pl-9 pr-4 py-2 rounded-full text-xs border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white/80">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-rose-400 text-xs"></i>
+      </div>
+    </div>
+    <div id="catalog-grid" class="grid grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 lg:gap-6"></div>
+    <div id="catalog-more" class="text-center mt-10"></div>
+  </div>
+</section>
+
+
+
+<section id="ocasiones" class="py-16 sm:py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+    <div class="text-center max-w-3xl mx-auto space-y-4">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3.5 py-1.5 rounded-full">El Arte de Regalar</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-title font-bold text-gray-900">
+        Flores para Cada <span class="text-gradient">Capítulo Inolvidable</span>
+      </h2>
+      <p class="text-gray-600 text-sm sm:text-base">
+        No esperes una fecha marcada en el calendario. Cada día tiene el potencial de convertirse en una memoria inolvidable.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="glass-card rounded-3xl p-8 space-y-4 border border-rose-100 relative group hover:border-rose-300 transition-all">
+        <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-2xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
+          <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <h3 class="font-serif-title font-bold text-2xl text-gray-900">Amor & Aniversarios</h3>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Expresa la profundidad de tus sentimientos con combinaciones de peonías y rosas inglesas que susurran romance e intimidad.
+        </p>
+        <button onclick="openModal('Asesoría para Aniversario')" class="inline-flex items-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700">
+          <span>Diseñar Arreglo Romántico</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 space-y-4 border border-rose-100 relative group hover:border-rose-300 transition-all">
+        <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-2xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
+          <i class="fa-solid fa-cake-candles"></i>
+        </div>
+        <h3 class="font-serif-title font-bold text-2xl text-gray-900">Celebraciones & Logros</h3>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Colores vibrantes y texturas exuberantes para homenajear cumpleaños, ascensos, graduaciones y triunfos de la vida.
+        </p>
+        <button onclick="openModal('Asesoría para Cumpleaños')" class="inline-flex items-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700">
+          <span>Ver Opciones de Regalo</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div class="glass-card rounded-3xl p-8 space-y-4 border border-rose-100 relative group hover:border-rose-300 transition-all">
+        <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-2xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
+          <i class="fa-solid fa-hand-holding-heart"></i>
+        </div>
+        <h3 class="font-serif-title font-bold text-2xl text-gray-900">Gratitud & "Porque Sí"</h3>
+        <p class="text-xs text-gray-600 leading-relaxed">
+          Los detalles inesperados son los que se graban en el corazón. Sorprende un martes cualquiera con elegancia botánica.
+        </p>
+        <button onclick="openModal('Detalle Sorpresa')" class="inline-flex items-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700">
+          <span>Enviar Sorpresa Hoy</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="servicios" class="py-16 sm:py-24 bg-rose-50/40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16 space-y-3">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3 py-1.5 rounded-full">Especialidades</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-title font-bold text-gray-900">
+        Servicios <span class="text-gradient">VIP & Proyectos</span>
+      </h2>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Diseño botánico a la medida para eventos privados, hoteles boutique y espacios exclusivos.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="glass-card glass-card-hover rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="h-56 overflow-hidden relative group">
+            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80" alt="Bodas de Ensueño" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-rose-600 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full shadow-sm">Bodas & Novias</span>
+          </div>
+          <div class="p-5 space-y-2">
+            <h3 class="font-serif-title font-bold text-gray-900 text-lg">Bodas de Ensueño</h3>
+            <p class="text-gray-600 text-xs leading-relaxed">Diseño botánico integral para ceremonias, ramos de novia y centros de mesa inolvidables.</p>
+          </div>
+        </div>
+        <div class="p-5 pt-0">
+          <button onclick="openModal('Bodas de Ensueño')" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-semibold text-xs transition-colors text-center">
+            Consultar Disponibilidad
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card glass-card-hover rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="h-56 overflow-hidden relative group">
+            <img src="https://images.unsplash.com/photo-1558535284-21b4a3839741?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D">
+            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-rose-600 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full shadow-sm">Espacios VIP</span>
+          </div>
+          <div class="p-5 space-y-2">
+            <h3 class="font-serif-title font-bold text-gray-900 text-lg">Suscripciones Corporativas</h3>
+            <p class="text-gray-600 text-xs leading-relaxed">Ambientación semanal renovada para hoteles boutique, restaurantes, oficinas y boutiques de lujo.</p>
+          </div>
+        </div>
+        <div class="p-5 pt-0">
+          <button onclick="openModal('Suscripciones Corporativas')" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-semibold text-xs transition-colors text-center">
+            Solicitar Catálogo
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card glass-card-hover rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="h-56 overflow-hidden relative group">
+            <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80" alt="Ramos de Autor" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-rose-600 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full shadow-sm">Bouquets Top</span>
+          </div>
+          <div class="p-5 space-y-2">
+            <h3 class="font-serif-title font-bold text-gray-900 text-lg">Ramos de Autor</h3>
+            <p class="text-gray-600 text-xs leading-relaxed">Composiciones florales personalizadas para aniversarios, cumpleaños y sorpresas con tarjetas escritas a mano.</p>
+          </div>
+        </div>
+        <div class="p-5 pt-0">
+          <button onclick="openModal('Ramos de Autor')" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-semibold text-xs transition-colors text-center">
+            Pedir Bouquet
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card glass-card-hover rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="h-56 overflow-hidden relative group">
+            <img src="https://images.unsplash.com/photo-1619888318371-068b9b0db284?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D">
+            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-rose-600 text-[10px] font-bold uppercase px-2.5 py-1 rounded-full shadow-sm">Alta Galería</span>
+          </div>
+          <div class="p-5 space-y-2">
+            <h3 class="font-serif-title font-bold text-gray-900 text-lg">Esculturas Florales</h3>
+            <p class="text-gray-600 text-xs leading-relaxed">Estructuras artísticas de gran formato, arcos botánicos e instalaciones flotantes para galas.</p>
+          </div>
+        </div>
+        <div class="p-5 pt-0">
+          <button onclick="openModal('Esculturas Florales')" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white text-rose-600 font-semibold text-xs transition-colors text-center">
+            Ver Proyectos
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-14 sm:py-20 bg-white border-t border-rose-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <div class="text-center max-w-2xl mx-auto space-y-3">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3 py-1.5 rounded-full">Experiencias</span>
+      <h2 class="text-3xl sm:text-4xl font-serif-title font-bold text-gray-900">
+        Lo que Opinan <span class="text-gradient">Nuestros Clientes VIP</span>
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="glass-card p-6 rounded-2xl border border-rose-100 space-y-4">
+        <div class="flex text-amber-400 text-xs gap-1">
+          <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        </div>
+        <p class="text-xs text-gray-600 italic">"Pedí el ramo Peonías Imperial para el aniversario de mis padres y superó cualquier expectativa. El empaque y la caligrafía a mano le dieron un toque impecable."</p>
+        <div class="flex items-center gap-3 pt-2">
+          <div class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-xs">CS</div>
+          <div>
+            <p class="text-xs font-bold text-gray-900">Camila Silva</p>
+            <p class="text-[10px] text-gray-400">Armenia, Quindío</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 rounded-2xl border border-rose-100 space-y-4">
+        <div class="flex text-amber-400 text-xs gap-1">
+          <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        </div>
+        <p class="text-xs text-gray-600 italic">"Visitar la boutique fue una experiencia maravillosa. El olor, el trato y la calidad de las flores duraron intactas más de 12 días en mi sala."</p>
+        <div class="flex items-center gap-3 pt-2">
+          <div class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-xs">MA</div>
+          <div>
+            <p class="text-xs font-bold text-gray-900">María Antonia Restrepo</p>
+            <p class="text-[10px] text-gray-400">Cliente Recurrente</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-6 rounded-2xl border border-rose-100 space-y-4">
+        <div class="flex text-amber-400 text-xs gap-1">
+          <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+        </div>
+        <p class="text-xs text-gray-600 italic">"Contratamos la decoración floral para nuestro evento corporativo y el resultado fue majestuoso. La respuesta por WhatsApp es rápida y muy profesional."</p>
+        <div class="flex items-center gap-3 pt-2">
+          <div class="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-xs">JG</div>
+          <div>
+            <p class="text-xs font-bold text-gray-900">Juan Gabriel Gómez</p>
+            <p class="text-[10px] text-gray-400">Director de Eventos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="inspiracion" class="py-14 sm:py-20 bg-gradient-to-b from-white via-rose-50/30 to-white relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3.5 py-1.5 rounded-full">Nuestra Esencia</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-title font-bold text-gray-900 leading-tight">
+        "Las flores no son solo un detalle, son el <span class="text-gradient">lenguaje de lo inexpresable</span>"
+      </h2>
+      <p class="text-gray-600 text-sm sm:text-base font-normal max-w-2xl mx-auto">
+        Transformamos sentimientos en composiciones vivas. Cada creación está pensada para inmortalizar un momento y regalar memorias inolvidables.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="glass-card rounded-2xl p-8 space-y-4 text-center border border-rose-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-gem"></i>
+        </div>
+        <h3 class="font-serif-title font-bold text-xl text-gray-900">Elegancia Sin Esfuerzo</h3>
+        <p class="text-gray-600 text-xs leading-relaxed italic">
+          "Un ramo bien pensado habla con la fuerza del silencio y transmite la sutileza del afecto genuino."
+        </p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-8 space-y-4 text-center border border-rose-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <h3 class="font-serif-title font-bold text-xl text-gray-900">Magia en Cada Detalle</h3>
+        <p class="text-gray-600 text-xs leading-relaxed italic">
+          "Cultivamos belleza para convertir días ordinarios en celebraciones llenas de vida, aroma y color."
+        </p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-8 space-y-4 text-center border border-rose-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-ribbon"></i>
+        </div>
+        <h3 class="font-serif-title font-bold text-xl text-gray-900">Conexiones Eternas</h3>
+        <p class="text-gray-600 text-xs leading-relaxed italic">
+          "Dar flores es regalar un instante suspendido en el tiempo, una caricia botánica que permanece en el alma."
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="boutique-local" class="py-16 sm:py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+    <div class="text-center max-w-3xl mx-auto space-y-4">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3.5 py-1.5 rounded-full">Espacio Físico</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-title font-bold text-gray-900">
+        Visita Nuestro <span class="text-gradient">Santuario Floral</span>
+      </h2>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Un rincón concebido para inspirar. Ven a elegir tus tallos favoritos directamente de nuestra cava climatizada, disfruta de un café artesanal y diseña tu arreglo junto a nuestros floristas.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+      <div class="md:col-span-7 relative rounded-3xl overflow-hidden min-h-[380px] sm:min-h-[480px] shadow-xl group">
+        <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=1200&q=80" alt="Interior Boutique Rosé & Bloom" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-gray-900/20 to-transparent"></div>
+        <div class="absolute bottom-8 left-8 right-8 text-white space-y-2">
+          <span class="bg-rose-500/90 backdrop-blur-md px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">Atelier de Autor</span>
+          <h3 class="font-serif-title font-bold text-2xl sm:text-3xl">Barra de Flores Frescas & Taller Abierto</h3>
+          <p class="text-xs sm:text-sm text-gray-200">Siente las texturas, aromas y colores en una atmósfera creada para los amantes del buen gusto.</p>
+        </div>
+      </div>
+
+      <div class="md:col-span-5 flex flex-col gap-6 justify-between">
+        <div class="relative rounded-3xl overflow-hidden h-56 sm:h-60 shadow-md group">
+          <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80" alt="Detalle de Floristería" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+          <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+          <div class="absolute bottom-4 left-6 text-white">
+            <p class="font-serif-title font-bold text-lg">Floristería Sensorial</p>
+            <p class="text-xs text-rose-200">Especies exclusivas importadas semanalmente</p>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-4 border border-rose-100 flex flex-col justify-between h-full shadow-sm">
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 text-rose-600">
+              <i class="fa-solid fa-map-pin text-xl"></i>
+              <h4 class="font-bold text-gray-900 text-base sm:text-lg">Ubicación Boutique</h4>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              <strong class="text-gray-900">Roselily Floristería Atelier Floral</strong><br>
+              Cra. 14 #15-02 Norte, Armenia, Quindío, Colombia.<br>
+              <span class="text-xs text-gray-500">Atención personalizada de Lunes a Sábado: 8:00 AM – 7:00 PM</span>
+            </p>
+          </div>
+
+          <div class="pt-4 flex flex-col sm:flex-row gap-3">
+            <a href="https://maps.google.com/?cid=463967057623681869" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-2xl bg-gray-900 hover:bg-gray-800 text-white font-bold text-xs text-center transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-location-arrow text-rose-400"></i> Google Maps
+            </a>
+            <button onclick="openModal('Visita Guiada Boutique')" class="w-full py-3 px-4 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs text-center transition-all shadow-md shadow-rose-200">
+              Agendar Cita
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="py-16 sm:py-24 bg-rose-50/30">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <div class="text-center space-y-3">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-500 bg-rose-100 px-3.5 py-1.5 rounded-full">Resuelve tus Dudas</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-title font-bold text-gray-900">
+        Preguntas <span class="text-gradient">Frecuentes</span>
+      </h2>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Todo lo que necesitas saber sobre nuestras entregas, cuidados y personalización.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="glass-card rounded-2xl border border-rose-100 overflow-hidden transition-all">
+        <button onclick="toggleFaq(1)" class="w-full p-6 text-left flex justify-between items-center gap-4 focus:outline-none">
+          <span class="font-serif-title font-semibold text-gray-900 text-base sm:text-lg">¿Con cuánta anticipación debo hacer mi pedido?</span>
+          <i id="faq-icon-1" class="fa-solid fa-chevron-down text-rose-500 transition-transform duration-300"></i>
+        </button>
+        <div id="faq-answer-1" class="hidden px-6 pb-6 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-rose-50 pt-4">
+          Recomendamos realizar tu pedido con al menos 24 a 48 horas de anticipación para garantizar disponibilidad de flores de cosecha especial. Sin embargo, contamos con un servicio express para entregas el mismo día para pedidos confirmados antes del mediodía.
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-rose-100 overflow-hidden transition-all">
+        <button onclick="toggleFaq(2)" class="w-full p-6 text-left flex justify-between items-center gap-4 focus:outline-none">
+          <span class="font-serif-title font-semibold text-gray-900 text-base sm:text-lg">¿Cómo funcionan los envíos y entregas?</span>
+          <i id="faq-icon-2" class="fa-solid fa-chevron-down text-rose-500 transition-transform duration-300"></i>
+        </button>
+        <div id="faq-answer-2" class="hidden px-6 pb-6 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-rose-50 pt-4">
+          Todas nuestras entregas se efectúan en vehículos climatizados para mantener la temperatura y frescura de los arreglos. Cubrimos Armenia y zonas aledañas del Eje Cafetero. El valor del envío se calcula según el lugar de destino.
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-rose-100 overflow-hidden transition-all">
+        <button onclick="toggleFaq(3)" class="w-full p-6 text-left flex justify-between items-center gap-4 focus:outline-none">
+          <span class="font-serif-title font-semibold text-gray-900 text-base sm:text-lg">¿Puedo personalizar la dedicatoria o tarjeta?</span>
+          <i id="faq-icon-3" class="fa-solid fa-chevron-down text-rose-500 transition-transform duration-300"></i>
+        </button>
+        <div id="faq-answer-3" class="hidden px-6 pb-6 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-rose-50 pt-4">
+          ¡Absolutamente! Todos nuestros arreglos incluyen sin costo adicional una tarjeta de lujo caligrafiada a mano. Al enviar tu solicitud por WhatsApp o completar el formulario de contacto, puedes escribir tu mensaje personalizado.
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-rose-100 overflow-hidden transition-all">
+        <button onclick="toggleFaq(4)" class="w-full p-6 text-left flex justify-between items-center gap-4 focus:outline-none">
+          <span class="font-serif-title font-semibold text-gray-900 text-base sm:text-lg">¿Cuánto tiempo duran las flores frescas?</span>
+          <i id="faq-icon-4" class="fa-solid fa-chevron-down text-rose-500 transition-transform duration-300"></i>
+        </button>
+        <div id="faq-answer-4" class="hidden px-6 pb-6 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-rose-50 pt-4">
+          Nuestras flores provienen de cosechas seleccionadas diariamente, garantizando una duración de 7 a 14 días con los cuidados adecuados (cambiar agua fresca cada 2 días, cortar tallos en diagonal y mantener alejado del sol directo).
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl border border-rose-100 overflow-hidden transition-all">
+        <button onclick="toggleFaq(5)" class="w-full p-6 text-left flex justify-between items-center gap-4 focus:outline-none">
+          <span class="font-serif-title font-semibold text-gray-900 text-base sm:text-lg">¿Cuáles son los medios de pago disponibles?</span>
+          <i id="faq-icon-5" class="fa-solid fa-chevron-down text-rose-500 transition-transform duration-300"></i>
+        </button>
+        <div id="faq-answer-5" class="hidden px-6 pb-6 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-rose-50 pt-4">
+          Aceptamos transferencias bancarias directas (Bancolombia, Nequi, Daviplata), tarjetas de crédito y débito a través de link de pago seguro, y pagos en efectivo en nuestra boutique física.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-14 sm:py-20 bg-gradient-to-br from-gray-900 via-rose-950 to-gray-900 text-white relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
+    <div class="text-center max-w-2xl mx-auto space-y-3">
+      <span class="text-xs font-bold uppercase tracking-widest text-rose-300 bg-rose-900/60 px-4 py-1.5 rounded-full border border-rose-700/50">Canales Directos</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-title font-bold text-white">
+        Conéctate con <span class="text-rose-400">Nuestro Atelier</span>
+      </h2>
+      <p class="text-gray-300 text-sm sm:text-base">
+        Síguenos en redes para inspiración diaria o escríbenos directamente para asesoría inmediata.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- WhatsApp Channel -->
+      <a href="https://wa.me/573017687272" target="_blank" rel="noopener noreferrer" class="group bg-white/10 backdrop-blur-md border border-white/10 hover:border-emerald-400/50 p-8 rounded-3xl transition-all hover:-translate-y-1 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div>
+            <h3 class="font-serif-title font-bold text-xl text-white">WhatsApp Atelier VIP</h3>
+            <p class="text-xs text-gray-300 mt-1">Atención inmediata, pedidos personalizados y cotizaciones al instante.</p>
+          </div>
+        </div>
+        <div class="pt-6 flex items-center gap-2 text-xs font-bold text-emerald-400 group-hover:underline">
+          <span>Iniciar Conversación (+57 301 768 7272)</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <!-- Instagram Channel -->
+      <a href="https://www.instagram.com/roselilyatelier" target="_blank" rel="noopener noreferrer" class="group bg-white/10 backdrop-blur-md border border-white/10 hover:border-rose-400/50 p-8 rounded-3xl transition-all hover:-translate-y-1 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+            <i class="fa-brands fa-instagram"></i>
+          </div>
+          <div>
+            <h3 class="font-serif-title font-bold text-xl text-white">Instagram Boutique</h3>
+            <p class="text-xs text-gray-300 mt-1">Galería de arreglos diarios, detrás de cámaras y lanzamientos de colección.</p>
+          </div>
+        </div>
+        <div class="pt-6 flex items-center gap-2 text-xs font-bold text-rose-400 group-hover:underline">
+          <span>Seguir @roselilyatelier</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+
+      <!-- Google Maps Channel -->
+      <a href="https://maps.google.com/?cid=463967057623681869" target="_blank" rel="noopener noreferrer" class="group bg-white/10 backdrop-blur-md border border-white/10 hover:border-amber-400/50 p-8 rounded-3xl transition-all hover:-translate-y-1 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <div>
+            <h3 class="font-serif-title font-bold text-xl text-white">Ubicación Física</h3>
+            <p class="text-xs text-gray-300 mt-1">Cra. 14 #15-02 Norte, Armenia, Quindío. Visita nuestro taller en vivo.</p>
+          </div>
+        </div>
+        <div class="pt-6 flex items-center gap-2 text-xs font-bold text-amber-400 group-hover:underline">
+          <span>Abrir en Google Maps</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-gray-950 text-white py-12 border-t border-gray-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center text-white text-lg">
+          <i class="fa-solid fa-spa"></i>
+        </div>
+        <div>
+          <span class="font-serif-title font-bold text-xl text-white block">ROSÉ & BLOOM</span>
+          <span class="text-[10px] text-gray-400 uppercase tracking-widest">High Floristry Atelier & Boutique</span>
+        </div>
+      </div>
+
+      <div class="text-center md:text-right">
+        <p class="text-xs text-gray-400">Roselily Floristería Atelier Floral • Cra. 14 #15-02 Norte, Armenia, Quindío</p>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+      <p>© 2026 Rosé & Bloom Atelier. Todos los derechos reservados.</p>
+      <div class="space-x-4">
+        <a href="#" class="hover:underline">Políticas de Privacidad</a>
+        <a href="#" class="hover:underline">Términos del Servicio</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div id="product-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4" onclick="if(event.target===this)closeProductModal()">
+  <div class="bg-white rounded-3xl max-w-3xl w-full relative border border-rose-200 shadow-2xl max-h-[92vh] overflow-hidden">
+    <button onclick="closeProductModal()" aria-label="Cerrar" class="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white/95 shadow-md text-gray-600 hover:text-rose-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+    <div class="overflow-y-auto max-h-[92vh] p-4 sm:p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+        <div class="space-y-3">
+          <div class="relative rounded-2xl overflow-hidden h-56 sm:h-72 md:h-80 shadow-md">
+            <img id="modal-img-main" src="" alt="" class="w-full h-full object-cover">
+            <span id="modal-category-badge" class="absolute top-3 left-3 bg-white/90 text-rose-600 text-[10px] font-bold uppercase px-3 py-1 rounded-full shadow-sm"></span>
+          </div>
+          <div class="flex gap-3 justify-center">
+            <button onclick="switchModalImage(0)" id="thumb-0" class="w-20 h-16 rounded-xl overflow-hidden border-2 border-rose-500"><img id="modal-img-thumb-0" src="" class="w-full h-full object-cover"></button>
+            <button onclick="switchModalImage(1)" id="thumb-1" class="w-20 h-16 rounded-xl overflow-hidden border-2 border-transparent opacity-60"><img id="modal-img-thumb-1" src="" class="w-full h-full object-cover"></button>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <h3 id="modal-title" class="font-serif-title font-bold text-2xl text-gray-900 pr-6"></h3>
+            <p id="modal-price" class="text-rose-600 font-bold text-xl mt-1"></p>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Descripción</p>
+            <p id="modal-desc" class="text-sm text-gray-600 leading-relaxed"></p>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-2">Variantes</p>
+            <div id="modal-variants-container" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div class="bg-rose-50/70 border border-rose-100 rounded-xl p-3">
+            <p class="text-[11px] font-bold text-rose-700 uppercase tracking-wider mb-1"><i class="fa-solid fa-circle-info mr-1"></i>Observación</p>
+            <p id="modal-obs" class="text-xs text-gray-600 leading-relaxed"></p>
+          </div>
+          <textarea id="modal-note" rows="2" placeholder="Dedicatoria o nota para este arreglo (opcional)" class="w-full px-3 py-2 rounded-xl border border-rose-100 focus:border-rose-400 outline-none text-xs"></textarea>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center border border-rose-200 rounded-full">
+              <button onclick="changeModalQty(-1)" class="w-9 h-9 text-rose-600 font-bold" aria-label="Menos">−</button>
+              <span id="modal-qty" class="w-8 text-center text-sm font-bold">1</span>
+              <button onclick="changeModalQty(1)" class="w-9 h-9 text-rose-600 font-bold" aria-label="Más">+</button>
+            </div>
+            <button onclick="addToCart()" class="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bag-shopping"></i> Añadir · <span id="modal-total"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="cart-fab" onclick="toggleCart(true)" aria-label="Ver carrito" class="fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-xl shadow-xl shadow-rose-300 flex items-center justify-center">
+  <i class="fa-solid fa-bag-shopping"></i>
+  <span class="cart-count hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-gray-900 text-white text-[11px] font-bold flex items-center justify-center">0</span>
+</button>
+<div id="toast" class="fixed bottom-24 right-5 z-[80] bg-gray-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity"></div>
+
+<div id="cart-overlay" class="fixed inset-0 z-[60] bg-black/50 hidden" onclick="toggleCart(false)"></div>
+<aside id="cart-drawer" class="fixed top-0 right-0 bottom-0 z-[70] w-full max-w-md bg-white shadow-2xl translate-x-full transition-transform duration-300 flex flex-col">
+  <div class="p-5 border-b border-rose-100 flex items-center justify-between">
+    <h3 class="font-serif-title font-bold text-xl text-gray-900"><i class="fa-solid fa-bag-shopping text-rose-500 mr-2"></i>Tu carrito</h3>
+    <button onclick="toggleCart(false)" aria-label="Cerrar" class="text-gray-400 hover:text-gray-700 text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+  <div class="p-5 border-t border-rose-100 space-y-3 bg-rose-50/30">
+    <input id="cart-name" type="text" placeholder="Tu nombre" class="w-full px-3 py-2.5 rounded-xl border border-rose-100 outline-none focus:border-rose-400 text-xs">
+    <textarea id="cart-delivery" rows="2" placeholder="Fecha, hora y dirección de entrega (opcional)" class="w-full px-3 py-2.5 rounded-xl border border-rose-100 outline-none focus:border-rose-400 text-xs"></textarea>
+    <div class="flex justify-between items-center"><span class="text-sm text-gray-600">Total estimado</span><span id="cart-total" class="font-bold text-lg text-rose-600"></span></div>
+    <p class="text-[10px] text-gray-400">El envío se cotiza según el destino al confirmar por WhatsApp.</p>
+    <button id="cart-send" onclick="sendCartWhatsApp()" class="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-lg"></i> Enviar pedido por WhatsApp</button>
+  </div>
+</aside>
+
+<div id="contact-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-all">
+  <div class="glass-card bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 relative border border-rose-200 shadow-2xl">
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl p-2">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto text-xl">
+        <i class="fa-brands fa-whatsapp"></i>
+      </div>
+      <h3 class="font-serif-title font-bold text-2xl text-gray-900">Solicitar Asesoría Directa</h3>
+      <p class="text-xs text-gray-500">Completa tus datos y te redirigiremos a WhatsApp con tu solicitud lista.</p>
+    </div>
+
+    <form id="modal-form" onsubmit="sendWhatsApp(event)" class="space-y-4 text-sm">
+      <div>
+        <label class="block text-xs font-bold text-gray-700 mb-1">Tu Nombre Completo</label>
+        <input type="text" id="form-name" required placeholder="Ej. Camila Silva" class="w-full px-4 py-3 rounded-xl border border-rose-100 focus:border-rose-400 focus:ring-1 focus:ring-rose-400 outline-none text-xs">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 mb-1">Motivo o Servicio de Interés</label>
+        <input type="text" id="form-service" readonly class="w-full px-4 py-3 rounded-xl bg-rose-50/50 border border-rose-100 font-semibold text-rose-600 text-xs">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-700 mb-1">Mensaje o Detalle Opcional</label>
+        <textarea id="form-message" rows="3" placeholder="Ej. Quisiera un ramo especial para entregar este viernes..." class="w-full px-4 py-3 rounded-xl border border-rose-100 focus:border-rose-400 focus:ring-1 focus:ring-rose-400 outline-none text-xs"></textarea>
+      </div>
+
+      <button type="submit" class="w-full py-3.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-rose-200 transition-all flex items-center justify-center gap-2">
+        <i class="fa-brands fa-whatsapp text-lg"></i> Iniciar Chat en WhatsApp
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Full dataset of 30 structured floristry products with dual images, categories, descriptions, prices and variants
+  const catalogProducts = [
+    {
+      id: 1,
+      name: 'Bouquet Peonías & Peonías Imperial',
+      category: 'bouquets',
+      price: 185000,
+      img1: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
+      desc: 'Composición majestuosa de peonías holandesas, rosas inglesas de jardín y finos brotes de eucalipto en envoltorio de seda.',
+      variants: ['Rosa Pastel', 'Blanco Marfil', 'Rubí Intenso']
+    },
+    {
+      id: 2,
+      name: 'Caja Velvet de Rosas English',
+      category: 'boxes',
+      price: 195000,
+      img1: 'https://images.unsplash.com/photo-1644248422980-8e0eb75a1557?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1644248422980-8e0eb75a1557?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      desc: 'Caja cilíndrica de terciopelo artesanal rellena de rosas inglesas altamente aromáticas y de apertura lenta.',
+      variants: ['Caja Rosa Nude', 'Caja Negra Luxury', 'Caja Perla']
+    },
+    {
+      id: 3,
+      name: 'Cúpula de Rosa Preservada Eternidad',
+      category: 'preserved',
+      price: 160000,
+      img1: 'https://images.unsplash.com/photo-1652346107876-58d7354ce9b8?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      desc: 'Rosa 100% natural sometida a proceso de liofilización en cúpula de cristal y base de madera noble. Dura +3 años.',
+      variants: ['Rosa Roja Real', 'Rosa Azul Zafiro', 'Rosa Dorada']
+    },
+    {
+      id: 4,
+      name: 'Orquídeas Phalaenopsis Luxe',
+      category: 'orchids',
+      price: 240000,
+      img1: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      desc: 'Exclusiva doble vara de orquídea Phalaenopsis de alta floración sembrada en maceta de cerámica artesanal con acabado dorado.',
+      variants: ['Blanca Pura', 'Púrpura Imperial', 'Moteada Vainilla']
+    },
+    {
+      id: 5,
+      name: 'Bouquet Silvestre Tulipanes & Hortensias',
+      category: 'bouquets',
+      price: 145000,
+      img1: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+      desc: 'Tulipanes holandeses de importación acompañados de suaves nubes de hortensias y follaje botánico silvestre.',
+      variants: ['Paleta Primavera', 'Tonos Pasteles', 'Vibrante Amarillo']
+    },
+    {
+      id: 6,
+      name: 'Arreglo Preservado Botanical Gold',
+      category: 'preserved',
+      price: 210000,
+      img1: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+      desc: 'Composición eterna en jarrón de cerámica con hortensias, pampas y flores secas de toque rústico elegante.',
+      variants: ['Arena & Cobre', 'Blanco & Oro', 'Eucalipto Seco']
+    },
+    {
+      id: 7,
+      name: 'Jarrón de Cristalería & Liliáceas',
+      category: 'vases',
+      price: 175000,
+      img1: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      desc: 'Lirios perfumados y rosas de varas largas presentados en jarrón cónico de cristal soplado transparente.',
+      variants: ['Lirios Blancos', 'Lirios Rosados', 'Lirios Amarillos']
+    },
+    {
+      id: 8,
+      name: 'Caja Cuadrada Bloom & Macarons',
+      category: 'boxes',
+      price: 220000,
+      img1: 'https://images.unsplash.com/photo-1680563094046-5d846e2c59d1?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+      desc: 'Exclusiva combinación de flores frescas de alta selección junto a 6 macarons franceses de pastelería fina.',
+      variants: ['Macarons Frutos Rojos', 'Macarons Vainilla & Pistacho']
+    },
+    {
+      id: 9,
+      name: 'Ramo de Autor Ranúnculos & Ranúnculos',
+      category: 'bouquets',
+      price: 165000,
+      img1: 'https://images.unsplash.com/photo-1610841802859-94794ea50e1b?q=80&w=436&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      desc: 'Delicados ranúnculos multicapa importados de Italia con envoltorio coreano impermeable y lazo de satén.',
+      variants: ['Durazno Coral', 'Blanco Nieve', 'Mezcla Silvestre']
+    },
+    {
+      id: 10,
+      name: 'Orquídea Cymbidium de Colección',
+      category: 'orchids',
+      price: 260000,
+      img1: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      desc: 'Rara variedad de orquídea Cymbidium de flores grandes en macetero de arcilla natural esmaltada a mano.',
+      variants: ['Verde Jade', 'Rosado Rubor', 'Crema Borgoña']
+    },
+    {
+      id: 11,
+      name: 'Caja Corazón de 24 Rosas Exportación',
+      category: 'boxes',
+      price: 210000,
+      img1: 'https://images.unsplash.com/photo-1563441353641-13e8fc015497?q=80&w=451&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80',
+      desc: 'Arreglo simétrico en forma de corazón con 24 rosas rojas seleccionadas botón gigante de la Sabana.',
+      variants: ['Rojo Pasión', 'Rosa Bebé', 'Blanco Perla']
+    },
+    {
+      id: 12,
+      name: 'Jarrón Escultórico con Anémonas',
+      category: 'vases',
+      price: 190000,
+      img1: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
+      desc: 'Anémonas de centro oscuro acompañadas de follajes nórdicos en vaso cerámico de diseño orgánico.',
+      variants: ['Anémonas Púrpuras', 'Anémonas Blancas']
+    },
+    {
+      id: 13,
+      name: 'Bouquet de Rosas Inglesas David Austin',
+      category: 'bouquets',
+      price: 230000,
+      img1: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      desc: 'La máxima expresión del lujo floral: rosas de fragancia intensa con pétalos ondulados en espiral.',
+      variants: ['Juliette Peach', 'Constance Pink', 'Purity White']
+    },
+    {
+      id: 14,
+      name: 'Cúpula LED Eterna Rosas & Hortensias',
+      category: 'preserved',
+      price: 180000,
+      img1: 'https://images.unsplash.com/photo-1584972720792-5477c604d033?q=80&w=435&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80',
+      desc: 'Arreglo preservado con iluminación de micro-luces cálidas LED incorporadas en la base de madera.',
+      variants: ['Luz Cálida Rosada', 'Luz Cálida Blanca']
+    },
+    {
+      id: 15,
+      name: 'Mini Trío de Orquídeas Phalaenopsis',
+      category: 'orchids',
+      price: 215000,
+      img1: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
+      desc: 'Trío de mini orquídeas en base alargada de piedra volcánica para centros de mesa elegantes.',
+      variants: ['Tonos Pastel', 'Tonos Blancos']
+    },
+    {
+      id: 16,
+      name: 'Caja Hexagonal de Rosas & Eucalipto',
+      category: 'boxes',
+      price: 170000,
+      img1: 'https://plus.unsplash.com/premium_photo-1780856534961-dfb6cf108bb9?q=80&w=385&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D',
+      img2: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      desc: 'Diseño geométrico moderno con rosas rosadas, follaje eucalipto dólar y toques de baby breath.',
+      variants: ['Caja Blanca', 'Caja Rosada', 'Caja Gris']
+    },
+    {
+      id: 17,
+      name: 'Bouquet de Girasoles Sol de Verano',
+      category: 'bouquets',
+      price: 135000,
+      img1: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      desc: 'Girasoles frescos de botón grande combinados con solidago brillante y envoltorio de yute natural.',
+      variants: ['Envoltorio Yute Rustic', 'Envoltorio Negro Chic']
+    },
+    {
+      id: 18,
+      name: 'Jarrón de Cristal Alto con Hortensias',
+      category: 'vases',
+      price: 165000,
+      img1: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+      desc: 'Trío de hortensias gigantes en jarrón cilíndrico de cristal con agua purificada y nutrientes.',
+      variants: ['Hortensias Azules', 'Hortensias Blancas', 'Hortensias Rosadas']
+    },
+    {
+      id: 19,
+      name: 'Arreglo Seco Pampas Grass & Algodón',
+      category: 'preserved',
+      price: 155000,
+      img1: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      desc: 'Composición bohemia de plumas pampas naturales, cápsulas de algodón y espigas de trigo.',
+      variants: ['Beige Natural', 'Pampas Rosa Soft']
+    },
+    {
+      id: 20,
+      name: 'Caja Luxury Acrílica Transparente',
+      category: 'boxes',
+      price: 250000,
+      img1: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+      desc: 'Caja de acrílico de alta densidad con depósito de agua interno donde las rosas parecen flotar.',
+      variants: ['Rosas Rojas', 'Rosas Rosadas', 'Rosas Blancas']
+    },
+    {
+      id: 21,
+      name: 'Orquídea Paphiopedilum Zapatito',
+      category: 'orchids',
+      price: 280000,
+      img1: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
+      desc: 'Exótica orquídea de colección privada con flor única de textura cerosa en maceta de terracota.',
+      variants: ['Variedad Verde Borgoña']
+    },
+    {
+      id: 22,
+      name: 'Bouquet de Rosas Spray & Claveles',
+      category: 'bouquets',
+      price: 125000,
+      img1: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      desc: 'Encantador ramo de múltiples ramas de rosas ramificadas y claveles poéticos con aroma especiado.',
+      variants: ['Durazno & Menta', 'Púrpura & Blanco']
+    },
+    {
+      id: 23,
+      name: 'Jarrón de Bronce con Calas & Proteas',
+      category: 'vases',
+      price: 245000,
+      img1: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
+      desc: 'Diseño arquitectónico con proteas sudafricanas y calas de líneas estilizadas en vaso metálico.',
+      variants: ['Protea King Rosa', 'Protea Exótica Amarilla']
+    },
+    {
+      id: 24,
+      name: 'Ramo de Eucalipto Variado & Lavanda',
+      category: 'bouquets',
+      price: 110000,
+      img1: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
+      desc: 'Ramo aromático relajante de 3 variedades de eucalipto fresco mezcladas con brotes de lavanda.',
+      variants: ['Fresco Natural', 'Secado Aromático']
+    },
+    {
+      id: 25,
+      name: 'Caja Sombrerera con Peonías & Rosas',
+      category: 'boxes',
+      price: 205000,
+      img1: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80',
+      desc: 'Inspirada en las sombrereras parisinas vintage, rellena de peonías y rosas en degrade suave.',
+      variants: ['Sombrerera Marfil', 'Sombrerera Rosa']
+    },
+    {
+      id: 26,
+      name: 'Cuadro Botánico Mosaico Preservado',
+      category: 'preserved',
+      price: 230000,
+      img1: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80',
+      desc: 'Obra de arte de pared en marco de madera con musgo finlandés y flores secas integradas.',
+      variants: ['Marco Madera Natural', 'Marco Blanco Minimalista']
+    },
+    {
+      id: 27,
+      name: 'Orquídea Dendrobium Blanca',
+      category: 'orchids',
+      price: 195000,
+      img1: 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      desc: 'Abundante racimo de flores pequeñas e intrincadas de orquídea Dendrobium en maceta de cerámica.',
+      variants: ['Blanca Pura', 'Púrpura Neón']
+    },
+    {
+      id: 28,
+      name: 'Jarrón de Cerámica con Astromelias',
+      category: 'vases',
+      price: 130000,
+      img1: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&w=800&q=80',
+      desc: 'Selección de astromelias multicolores de larga duración en jarrón artesanal de barro horneado.',
+      variants: ['Multicolor Alegre', 'Blanca & Verde']
+    },
+    {
+      id: 29,
+      name: 'Bouquet de Delphinium Azul Celeste',
+      category: 'bouquets',
+      price: 175000,
+      img1: 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80',
+      desc: 'Esteras elevadas de delphinium azul cobalto y celeste con follaje fino de textura etérea.',
+      variants: ['Azul Cobalto', 'Azul Pastel']
+    },
+    {
+      id: 30,
+      name: 'Caja Luxury Imperial de 50 Rosas',
+      category: 'boxes',
+      price: 320000,
+      img1: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+      img2: 'https://images.unsplash.com/photo-1508610048659-a06b669e3321?auto=format&fit=crop&w=800&q=80',
+      desc: 'La máxima expresión de opulencia floral: caja extragrande con 50 rosas de selección especial de exportación.',
+      variants: ['Rojo Pasión', 'Rosa Degrade', 'Blanco Marfil']
+    }
+  ];
+
+  const PAGE_SIZE = 12;
+  const WA_NUMBER = '573017687272';
+  let currentActiveCategory = 'all', currentSearchQuery = '', visibleCount = PAGE_SIZE;
+  let selectedProductForModal = null, selectedVariantIndex = 0, modalQty = 1;
+  let cart = [];
+  try { cart = JSON.parse(localStorage.getItem('rb_cart') || '[]'); } catch (e) { cart = []; }
+
+  const moneyShort = n => '$' + n.toLocaleString('es-CO');
+  const money = n => '$' + n.toLocaleString('es-CO') + ' COP';
+
+  // Observación por categoría (puedes poner una propia en cada producto con la clave "obs")
+  const OBS = {
+    bouquets: 'Flor fresca natural: el tono exacto puede variar levemente según la cosecha del día. Recomendamos pedir con 24 a 48 horas de anticipación.',
+    boxes: 'Las rosas se entregan en botón para que duren más y abran poco a poco. Pedir con 24 horas de anticipación.',
+    preserved: 'No necesita agua ni luz solar directa. Mantener lejos de la humedad.',
+    orchids: 'Requiere luz indirecta y riego ligero. Se entrega en su maceta, lista para exhibir.',
+    vases: 'El jarrón o recipiente puede variar según disponibilidad de la pieza artesanal.'
+  };
+  const getObs = p => p.obs || OBS[p.category] || '';
+
+  function getCategoryName(k) {
+    return { bouquets: 'Bouquet de Autor', boxes: 'Caja Luxury', preserved: 'Flores Preservadas', orchids: 'Orquídeas VIP', vases: 'Jarrón Exclusivo' }[k] || 'Alta Cosecha';
+  }
+
+  function getFiltered() {
+    const q = currentSearchQuery.toLowerCase();
+    return catalogProducts.filter(p =>
+      (currentActiveCategory === 'all' || p.category === currentActiveCategory) &&
+      (p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)));
+  }
+
+  function renderCatalog() {
+    const grid = document.getElementById('catalog-grid');
+    const more = document.getElementById('catalog-more');
+    if (!grid) return;
+    const list = getFiltered();
+    if (!list.length) {
+      grid.innerHTML = `<div class="col-span-full text-center py-12 space-y-3"><i class="fa-solid fa-seedling text-3xl text-rose-300"></i><p class="text-gray-500 text-sm">No encontramos arreglos con esa búsqueda.</p><button onclick="resetFilters()" class="text-xs font-bold text-rose-600 underline">Restablecer filtros</button></div>`;
+      more.innerHTML = '';
+      return;
+    }
+    grid.innerHTML = list.slice(0, visibleCount).map(p => `
+                <article onclick="openProductModal(${p.id})" class="group cursor-pointer glass-card glass-card-hover rounded-xl sm:rounded-2xl overflow-hidden flex flex-col min-w-0 border border-rose-100/80">
+                    <div class="aspect-square overflow-hidden relative">
+                        <img src="${p.img1}" alt="${p.name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <span class="hidden sm:block absolute top-2 left-2 bg-white/90 text-rose-600 text-[9px] font-bold uppercase px-2.5 py-1 rounded-full shadow-sm">${getCategoryName(p.category)}</span>
+                    </div>
+                    <div class="p-2 sm:p-4 flex flex-col gap-1 flex-1">
+                        <h3 class="font-serif-title font-bold text-gray-900 text-[11px] sm:text-base leading-tight sm:leading-snug line-clamp-2 break-words">${p.name}</h3>
+                        <p class="hidden sm:block text-gray-500 text-[11px] leading-relaxed line-clamp-2">${p.desc}</p>
+                        <div class="mt-auto pt-2 flex items-center justify-between gap-x-2">
+                            <p class="font-bold text-rose-600 text-[11px] sm:text-base whitespace-nowrap">${moneyShort(p.price)}</p>
+                            <span class="hidden sm:inline text-[10px] font-semibold text-rose-600 group-hover:underline whitespace-nowrap">Ver más <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </article>`).join('');
+    const rest = list.length - visibleCount;
+    more.innerHTML = rest > 0 ? `<button onclick="showMore()" class="px-8 py-3 rounded-full bg-white border border-rose-200 hover:bg-rose-500 hover:text-white text-rose-600 font-bold text-xs transition-colors shadow-sm">Ver más arreglos (${rest})</button>` : '';
+  }
+  function showMore() { visibleCount += PAGE_SIZE; renderCatalog(); }
+
+  function updateCategoryCounts() {
+    document.getElementById('cat-all-count').innerText = catalogProducts.length;
+    ['bouquets', 'boxes', 'preserved', 'orchids', 'vases'].forEach(c => {
+      document.getElementById('cat-' + c + '-count').innerText = catalogProducts.filter(p => p.category === c).length;
+    });
+    document.getElementById('nav-count').innerText = catalogProducts.length;
+  }
+
+  function filterCatalog(cat) {
+    currentActiveCategory = cat; visibleCount = PAGE_SIZE;
+    document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+      btn.className = btn.dataset.cat === cat
+        ? 'cat-filter-btn active whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-500 text-white'
+        : 'cat-filter-btn whitespace-nowrap shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all bg-rose-50 text-gray-600 hover:bg-rose-100';
+    });
+    renderCatalog();
+  }
+  function handleSearch() { currentSearchQuery = document.getElementById('catalog-search').value; visibleCount = PAGE_SIZE; renderCatalog(); }
+  function resetFilters() { currentSearchQuery = ''; document.getElementById('catalog-search').value = ''; filterCatalog('all'); }
+
+  // ---------- Modal de producto ----------
+  function openProductModal(id) {
+    const p = catalogProducts.find(x => x.id === id);
+    if (!p) return;
+    selectedProductForModal = p; selectedVariantIndex = 0; modalQty = 1;
+    document.getElementById('modal-title').innerText = p.name;
+    document.getElementById('modal-price').innerText = money(p.price);
+    document.getElementById('modal-desc').innerText = p.desc;
+    document.getElementById('modal-obs').innerText = getObs(p);
+    document.getElementById('modal-category-badge').innerText = getCategoryName(p.category);
+    document.getElementById('modal-img-thumb-0').src = p.img1;
+    document.getElementById('modal-img-thumb-1').src = p.img2;
+    document.getElementById('modal-note').value = '';
+    document.getElementById('modal-qty').innerText = 1;
+    switchModalImage(0); renderModalVariants(); updateModalTotal();
+    document.getElementById('product-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function switchModalImage(i) {
+    const p = selectedProductForModal; if (!p) return;
+    document.getElementById('modal-img-main').src = i === 0 ? p.img1 : p.img2;
+    document.getElementById('thumb-0').className = 'w-20 h-16 rounded-xl overflow-hidden border-2 ' + (i === 0 ? 'border-rose-500' : 'border-transparent opacity-60');
+    document.getElementById('thumb-1').className = 'w-20 h-16 rounded-xl overflow-hidden border-2 ' + (i === 1 ? 'border-rose-500' : 'border-transparent opacity-60');
+  }
+  function renderModalVariants() {
+    document.getElementById('modal-variants-container').innerHTML = selectedProductForModal.variants.map((v, i) =>
+      `<button onclick="selectVariant(${i})" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${i === selectedVariantIndex ? 'bg-rose-500 text-white shadow-sm' : 'bg-rose-50 text-gray-700 hover:bg-rose-100'}">${v}</button>`).join('');
+  }
+  function selectVariant(i) { selectedVariantIndex = i; renderModalVariants(); }
+  function changeModalQty(d) { modalQty = Math.max(1, Math.min(20, modalQty + d)); document.getElementById('modal-qty').innerText = modalQty; updateModalTotal(); }
+  function updateModalTotal() { document.getElementById('modal-total').innerText = money(selectedProductForModal.price * modalQty); }
+  function closeProductModal() {
+    document.getElementById('product-modal').classList.add('hidden');
+    document.body.style.overflow = ''; selectedProductForModal = null;
+  }
+
+  // ---------- Carrito ----------
+  function saveCart() { try { localStorage.setItem('rb_cart', JSON.stringify(cart)); } catch (e) {} }
+  function addToCart() {
+    const p = selectedProductForModal; if (!p) return;
+    const variant = p.variants[selectedVariantIndex];
+    const note = document.getElementById('modal-note').value.trim();
+    const ex = cart.find(i => i.id === p.id && i.variant === variant && i.note === note);
+    if (ex) ex.qty += modalQty; else cart.push({ id: p.id, name: p.name, variant, price: p.price, qty: modalQty, note });
+    saveCart(); renderCart(); closeProductModal();
+    showToast('Añadido al carrito ✓');
+    const fab = document.getElementById('cart-fab'); fab.classList.remove('bump'); void fab.offsetWidth; fab.classList.add('bump');
+  }
+  function changeCartQty(i, d) { cart[i].qty += d; if (cart[i].qty < 1) cart.splice(i, 1); saveCart(); renderCart(); }
+  function removeCartItem(i) { cart.splice(i, 1); saveCart(); renderCart(); }
+  function cartTotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
+  function renderCart() {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    document.querySelectorAll('.cart-count').forEach(el => { el.innerText = count; el.classList.toggle('hidden', count === 0); });
+    const box = document.getElementById('cart-items');
+    box.innerHTML = cart.length ? cart.map((it, i) => `
+                <div class="flex gap-3 pb-4 border-b border-rose-50">
+                    <img src="${catalogProducts.find(p => p.id === it.id).img1}" alt="" class="w-16 h-20 rounded-xl object-cover">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-serif-title font-bold text-sm text-gray-900 leading-snug">${it.name}</p>
+                        <p class="text-[11px] text-gray-500">${it.variant}</p>
+                        ${it.note ? `<p class="text-[11px] text-gray-400 italic truncate">“${it.note}”</p>` : ''}
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center border border-rose-200 rounded-full text-xs">
+                                <button onclick="changeCartQty(${i},-1)" class="w-7 h-7 text-rose-600 font-bold" aria-label="Menos">−</button>
+                                <span class="w-6 text-center font-bold">${it.qty}</span>
+                                <button onclick="changeCartQty(${i},1)" class="w-7 h-7 text-rose-600 font-bold" aria-label="Más">+</button>
+                            </div>
+                            <span class="font-bold text-sm text-rose-600">${money(it.price * it.qty)}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeCartItem(${i})" aria-label="Quitar" class="text-gray-300 hover:text-rose-500 self-start"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>`).join('')
+      : `<div class="text-center text-gray-400 py-16 space-y-3"><i class="fa-solid fa-seedling text-4xl text-rose-200"></i><p class="text-sm">Tu carrito está vacío.</p><button onclick="toggleCart(false)" class="text-xs font-bold text-rose-600 underline">Explorar el catálogo</button></div>`;
+    document.getElementById('cart-total').innerText = money(cartTotal());
+    const send = document.getElementById('cart-send');
+    send.disabled = !cart.length; send.classList.toggle('opacity-50', !cart.length); send.classList.toggle('pointer-events-none', !cart.length);
+  }
+  function toggleCart(open) {
+    document.getElementById('cart-drawer').classList.toggle('translate-x-full', !open);
+    document.getElementById('cart-overlay').classList.toggle('hidden', !open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  function sendCartWhatsApp() {
+    if (!cart.length) return;
+    const name = document.getElementById('cart-name').value.trim();
+    const delivery = document.getElementById('cart-delivery').value.trim();
+    let msg = 'Hola Rosé & Bloom! Quisiera hacer este pedido:\n\n';
+    cart.forEach((it, i) => {
+      msg += `${i + 1}. *${it.name}*\n   Variante: ${it.variant}\n   Cantidad: ${it.qty} — ${money(it.price * it.qty)}\n`;
+      if (it.note) msg += `   Nota: ${it.note}\n`;
+    });
+    msg += `\n*Total estimado: ${money(cartTotal())}* (sin envío)\n`;
+    if (name) msg += `\nNombre: ${name}`;
+    if (delivery) msg += `\nEntrega: ${delivery}`;
+    msg += '\n\n¿Tienen disponibilidad?';
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+  function showToast(t) {
+    const el = document.getElementById('toast'); el.innerText = t; el.style.opacity = 1;
+    clearTimeout(showToast._t); showToast._t = setTimeout(() => el.style.opacity = 0, 1800);
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeProductModal(); toggleCart(false); } });
+
+  function toggleFaq(id) {
+    const answer = document.getElementById(`faq-answer-${id}`);
+    const icon = document.getElementById(`faq-icon-${id}`);
+    if (answer && icon) {
+      if (answer.classList.contains('hidden')) {
+        answer.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        answer.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+  }
+
+  // Initialize Background Scene & UI
+  window.addEventListener('DOMContentLoaded', () => {
+    updateCategoryCounts();
+    renderCatalog();
+
+    const container = document.getElementById('canvas-container');
+    if (!container) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.z = 15;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff1f2, 1.2);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
+
+    function createPetalGeometry() {
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.bezierCurveTo(0.8, 0.8, 1.2, 2.2, 0, 3.2);
+      shape.bezierCurveTo(-1.2, 2.2, -0.8, 0.8, 0, 0);
+
+      const extrudeSettings = {
+        steps: 1, depth: 0.08, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.08, bevelSegments: 3
+      };
+      return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    }
+
+    const petalGeo = createPetalGeometry();
+    const materials = [
+      new THREE.MeshPhongMaterial({ color: 0xfb7185, shininess: 30, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }),
+      new THREE.MeshPhongMaterial({ color: 0xfda4af, shininess: 20, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }),
+      new THREE.MeshPhongMaterial({ color: 0xffe4e6, shininess: 40, side: THREE.DoubleSide, transparent: true, opacity: 0.9 })
+    ];
+
+    const petals = [];
+    for (let i = 0; i < 30; i++) {
+      const mat = materials[Math.floor(Math.random() * materials.length)];
+      const mesh = new THREE.Mesh(petalGeo, mat);
+      mesh.position.set((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 15);
+      const scale = 0.3 + Math.random() * 0.4;
+      mesh.scale.set(scale, scale, scale);
+      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+      mesh.userData = {
+        rotSpeedX: (Math.random() - 0.5) * 0.015,
+        rotSpeedY: (Math.random() - 0.5) * 0.015,
+        rotSpeedZ: (Math.random() - 0.5) * 0.015,
+        floatSpeed: 0.005 + Math.random() * 0.008
+      };
+      petals.push(mesh);
+      scene.add(mesh);
+    }
+
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      petals.forEach(p => {
+        p.rotation.x += p.userData.rotSpeedX;
+        p.rotation.y += p.userData.rotSpeedY;
+        p.rotation.z += p.userData.rotSpeedZ;
+        p.position.y -= p.userData.floatSpeed;
+        if (p.position.y < -12) p.position.y = 12;
+      });
+      camera.position.x += (mouseX * 2 - camera.position.x) * 0.03;
+      camera.position.y += (-mouseY * 2 - camera.position.y) * 0.03;
+      camera.lookAt(scene.position);
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  });
+
+  // Mobile Nav Drawer Toggle
+  const mobileBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (mobileBtn && mobileMenu) {
+    mobileBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+  }
+
+  function openModal(serviceName) {
+    const modal = document.getElementById('contact-modal');
+    const serviceInput = document.getElementById('form-service');
+    if (serviceInput) serviceInput.value = serviceName;
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('contact-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  function sendWhatsApp(event) {
+    event.preventDefault();
+    const name = document.getElementById('form-name').value;
+    const service = document.getElementById('form-service').value;
+    const message = document.getElementById('form-message').value;
+
+    const text = `Hola Rosé & Bloom! Mi nombre es ${name}. Quisiera solicitar información sobre: *${service}*. ${message ? 'Detalles: ' + message : ''}`;
+    window.open(`https://wa.me/573017687272?text=${encodeURIComponent(text)}`, '_blank');
+    closeModal();
+  }
+  renderCart();
+</script>
+</body>
+</html>
